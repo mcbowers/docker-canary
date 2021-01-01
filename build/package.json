@@ -1,0 +1,25 @@
+{
+  "name": "docker-canary",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "export APTUS_DB=mongodb://localhost:27017/aptus-test; node index",
+    "build": "mkdir -p build; cp package.json build; cd build; npm install --production; cd ..; docker build -t $npm_package_name:latest .",
+    "start": "docker rm -f $npm_package_name; docker run -d --name $npm_package_name -p 8065:8065 --network bridge $npm_package_name",
+    "deploy-prod": "`aws ecr get-login --no-include-email --region us-east-1`; docker tag $npm_package_name:latest 587133816005.dkr.ecr.us-east-1.amazonaws.com/${npm_package_name}:latest; docker push 587133816005.dkr.ecr.us-east-1.amazonaws.com/${npm_package_name}:latest; aws ecs update-service --cluster aptus --service $npm_package_name --task-definition $npm_package_name --desired-count 1 --force-new-deployment",
+    "deploy-test": "`aws ecr get-login --no-include-email --region us-east-1`; docker tag $npm_package_name:latest 587133816005.dkr.ecr.us-east-1.amazonaws.com/${npm_package_name}:test; docker push 587133816005.dkr.ecr.us-east-1.amazonaws.com/${npm_package_name}:test; aws ecs update-service --cluster aptus-test --service $npm_package_name --task-definition ${npm_package_name}-test --desired-count 1 --force-new-deployment"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/aputscapital/docker-canary.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/aputscapital/docker-canary#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "lib-server-utils": "git+ssh://git@bitbucket.org/aptuscapital/lib-server-utils.git",
+    "sort-object": "^3.0.3"
+  }
+}
