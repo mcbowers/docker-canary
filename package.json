@@ -7,7 +7,8 @@
     "test": "export NODE_ENV=test; node index",
     "build": "mkdir -p build; cp package.json build; cd build; npm install --production; cd ..; docker build -t pushbuttonfun.com/$npm_package_name:latest .",
     "start": "docker rm -f $npm_package_name; docker run -d --name $npm_package_name -p 8065:8065 --network bridge pushbuttonfun.com/$npm_package_name:latest",
-    "push": "docker tag pushbuttonfun.com/$npm_package_name:latest localhost:5000/pushbuttonfun.com/$npm_package_name:latest; docker push localhost:5000/pushbuttonfun.com/$npm_package_name:latest"
+    "push": "docker tag pushbuttonfun.com/$npm_package_name:latest localhost:5000/pushbuttonfun.com/$npm_package_name:latest; docker push localhost:5000/pushbuttonfun.com/$npm_package_name:latest",
+    "deploy": "kubectl apply -f ./docker-canary.yml"
   },
   "repository": {
     "type": "git",

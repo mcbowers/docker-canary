@@ -1,24 +1,17 @@
 # Docker Canary
 
 ## Description
-The Docker Canary is a sample application used to validate docker deployments and related infrastructure elements.   The container runs an express server that responds with basic information on the request events and context, environment, and checks of basic services.
-
-The container can be accessed via the ALB (eg. https://api.test.aptus-hub.com/docker-canary).
-
-A diagram of the solution is shown below.
-
-![Diagram](./diagram.png)
+The Docker Canary is a sample application that runs an express server that responds with basic information on the request events and context, environment, and checks of basic services.
 
 ## Building/Test/Deploying
-*Note: once the CI/CD pipeline is available the container will build and deploy automatically based on the branch (master goes to prod, test goes to test).
-
 ### Building
 The container can be built by running ```npm run build```.   This will build the container and make it available to the local environment.
 
 ### Deploying
-To deploy the container to test run ```npm run deploy-test``` and for production run ```npm run deploy-prod```.
+To deploy into a local kubernetes environment first insure that a local repository is running by typing ```docker ps |grep registry```.   If necessary a local repo can be created by running ```docker run -d -p 5000:5000 --restart=always --name registry registry:2```
 
-*Note: In order for the deploy to be successful you will need to have an AWS CLI setup and configured to talk to the aptus-hub account.*
+Next, push the local repo to the private repository by running ```npm run push```.    Once the container has been pushed run ```npm run deploy``` to create the necessary Kubernetes deployment and services.
 
+Once the deployment is complete the service can be accessed from https://localhost:8065.
 ### Testing
 The container can be run locally by running ```npm run start```.   This will cause the container to run locally on port 8065.   To test the service you can type ```curl localhost:8065```.
