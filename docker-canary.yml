@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker-canary
+  labels:
+    app: docker-canary
+    tier: frontend
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: docker-canary
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: docker-canary
+        tier: frontend
+    spec:
+      containers:
+      - name: docker-canary
+        image: localhost:5000/pushbuttonfun.com/docker-canary:latest
+        ports:
+        - containerPort: 8065
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: docker-canary
+  labels:
+    app: docker-canary
+    tier: frontend
+spec:
+  type: LoadBalancer
+  ports:
+    - name: "8065"
+      port: 8065 
+      targetPort: 8065 
+  selector:
+    app: docker-canary
+    tier: frontend

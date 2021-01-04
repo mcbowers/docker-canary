@@ -32,8 +32,9 @@ const checkAll = async () => {
             redis: await checkRedis(),
             mysql: await checkMySQL(),
             mongo: await checkMongo(),
-
-        }
+        },
+        env: process.env.NODE_ENV,
+        config: config
     };
 };
 
