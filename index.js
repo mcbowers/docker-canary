@@ -57,7 +57,7 @@ const checkMySQL = async () => {
     try {
         connection = await mysql.createConnection(config.mysql);
         connection.close();
-        return { status: true, message: 'Successfully connected to DocumentDB.' };
+        return { status: true, message: 'Successfully connected to MySQL.' };
     } catch (error) {
         if (connection) connection.close();
         return { status: false, message: error };
