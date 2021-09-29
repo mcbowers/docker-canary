@@ -33,11 +33,11 @@ metadata:
     app: docker-canary
     tier: frontend
 spec:
-  type: LoadBalancer
+  type: NodePort
   ports:
     - name: "8065"
       port: 8065 
-      targetPort: 8065 
+      nodePort: 8065 
   selector:
     app: docker-canary
     tier: frontend

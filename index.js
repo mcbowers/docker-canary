@@ -91,25 +91,67 @@ const checkRabbit = async () => {
 };
 
 
-const health = async (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.status(200);
-    res.send({});
-}
-
-const defaultHandler = async (req, res) => {
+const connectivityHandler = async (req, res) => {
     const response = {
         data: { ...await checkAll() }
     }
     log.info(`${HOST}:${ID} received an info request on ${req.url}, returning ${JSON.stringify(response)}`);
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200);
+    res.send(response);
+}
+
+
+const healthHandler = async (req, res) => {
+    let response = {
+        name: NAME,
+        host: HOST,
+        id: ID,
+        time: new Date(),
+        uptime: process.uptime(),
+        message: 'Service is healty.'
+    };
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200);
+    res.send(response);
+}
+
+const helpHandler = (req, res) => {
+    const response = {
+        commands: [
+            { route: '/', description: 'Defaults to /help.' },
+            { route: '/connectivity', description: 'Check connectivity info.' },
+            { route: '/health', description: 'Display health check.' },
+            { route: '/help', description: 'Display usage information.' },
+            { route: '/process', description: 'Show process information.' }
+        ]
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.status(404);
+    res.send(JSON.stringify(response, null, 3));
+}
+
+const processHandler = async (req, res) => {
+    const response = {
+        host: HOST,
+        id: ID,
+        time: new Date(),
+        uptime: process.uptime(),
+        env: sortObject(process.env)
+    };
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200);
     res.send(response);
 }
 
 const errorHandler = (req, res) => {
-    let message = {
+    let response = {
         name: NAME,
         host: HOST,
         id: ID,
@@ -119,19 +161,18 @@ const errorHandler = (req, res) => {
     log.info(`${HOST}:${PORT} received a request for an unsupported route: ${req.url}`);
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json');
     res.status(404);
-    res.send(message);
+    res.send(response);
 }
 
+app.get('/', helpHandler); app.get('/${NAME}', helpHandler);
+app.get('/connectivity', connectivityHandler); app.get('/${NAME}/connectivity', connectivityHandler);
+app.get('/health', healthHandler); app.get('/${NAME}/health', healthHandler);
+app.get('/help', helpHandler); app.get('/${NAME}/help', helpHandler);
+app.get('/process', processHandler); app.get('/${NAME}/process', processHandler);
 
-app.get('/', defaultHandler);           // Real root route.
-app.get(`/${NAME}`, defaultHandler);    // Silly root route due to AWS ELB passing in the route.
-
-app.get('/health', health);
-app.get(`/${NAME}/health`, health);
-
-app.use(errorHandler);                  // Everything else.
-
+app.use(errorHandler);
 
 app.listen(PORT, () => {
     log.info(`${NAME} ${HOST}:${ID} listening for API requests on port ${PORT} at ${new Date()}.`);
