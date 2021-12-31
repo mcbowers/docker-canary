@@ -47,7 +47,7 @@ const checkMongo = async () => {
         return { status: true, message: 'Successfully connected to Mongo.' };
     } catch (error) {
         if (client) client.close();
-        return { status: false, message: error };
+        return { status: false, message: error || 'Problem connecting to mongo.' };
     }
 };
 
@@ -60,20 +60,21 @@ const checkMySQL = async () => {
         return { status: true, message: 'Successfully connected to MySQL.' };
     } catch (error) {
         if (connection) connection.close();
-        return { status: false, message: error };
+        return { status: false, message: error || 'Problem connecting to mysql.' };
     }
 };
 
 const checkRedis = async () => {
     log.debug('Checking Redis connection.');
-    let connection = null;
+    let client = null;
     try {
-        connection = redis.createClient(config.redis);
-        connection.end();
+        client = redis.createClient(config.redis);
+	    await client.connect();
+        await client.quit();
         return { status: true, message: 'Successfully connected to Redis.' };
     } catch (error) {
-        if (connection) connection.end();
-        return { status: false, message: error };
+        if (client) await client.quit();
+        return { status: false, message: error || 'Problem connecting to redis.' };
     }
 };
 
@@ -82,11 +83,11 @@ const checkRabbit = async () => {
     let connection = null;
     try {
         connection = await amqp.connect(config.rabbit);
-        connection.close();
+        await connection.close();
         return { status: true, message: 'Successfully connected to Rabbit.' };
     } catch (error) {
-        if (connection) connection.close();
-        return { status: false, message: error };
+        if (connection) await connection.close();
+        return { status: false, message: error || 'Problem connecting to rabbit.' };
     }
 };
 
@@ -111,7 +112,7 @@ const healthHandler = async (req, res) => {
         id: ID,
         time: new Date(),
         uptime: process.uptime(),
-        message: 'Service is healty.'
+        message: 'Service is healthy.'
     };
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
