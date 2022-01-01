@@ -71,10 +71,12 @@ const checkRedis = async () => {
         client = redis.createClient(config.redis);
 	    await client.connect();
         await client.quit();
+        client = null;
         return { status: true, message: 'Successfully connected to Redis.' };
     } catch (error) {
         if (client) await client.quit();
-        return { status: false, message: error || 'Problem connecting to redis.' };
+        log.error(error.message);
+        return { status: false, message: error.message };
     }
 };
 
