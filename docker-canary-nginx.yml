@@ -1,0 +1,80 @@
+kind: Deployment
+apiVersion: apps/v1
+
+metadata:
+    name: docker-canary-deployment
+    labels:
+        app: docker-canary
+        tier: web
+
+spec:
+    template:
+        metadata:
+            name: docker-canary
+            labels:
+                app: docker-canary
+                tier: web
+        spec:
+            containers:
+                - name: docker-canary
+                  image: localhost:5000/pushbuttonfun.com/docker-canary:latest
+    replicas: 2
+    selector:
+        matchLabels:
+            app: docker-canary
+            tier: web
+
+---
+kind: Service
+apiVersion: v1
+
+metadata:
+    name: docker-canary
+    labels:
+        app: docker-canary
+        tier: web
+
+spec:
+    #type: NodePort
+    #ports:
+    #  - nodePort: 30065
+    #    port: 8065
+    #    targetPort: 8065
+
+    #type: LoadBalancer
+    #ports:
+    #  - port: 8080
+    #    targetPort: 8065
+
+    # Cluster IP
+    ports:
+        - protocol: TCP
+          port: 8065
+          targetPort: 8065
+
+    selector: # Link "service" to pod that matches these filter criteria.
+        app: docker-canary
+        tier: web
+
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+    name: docker-canary
+    labels:
+        app: docker-canary
+        tier: web
+    annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+spec:
+    rules:
+        - http:
+              paths:
+                  - path: /docker-canary(/|$)(.*)
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: docker-canary
+                            port:
+                                number: 8065
